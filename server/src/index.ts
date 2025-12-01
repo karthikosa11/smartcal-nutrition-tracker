@@ -66,8 +66,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Initialize database and warehouse
 initializeDatabase()
-  .then(() => initializeWarehouse())
-  .catch(console.error);
+  .then(() => {
+    console.log('✅ Database initialized successfully');
+    return initializeWarehouse();
+  })
+  .then(() => {
+    console.log('✅ Data warehouse initialized successfully');
+  })
+  .catch((error) => {
+    console.error('❌ Initialization error:', error);
+    console.error('This might be normal on first startup if tables need to be created.');
+  });
 
 // Routes
 app.use('/api/auth', authRoutes);
