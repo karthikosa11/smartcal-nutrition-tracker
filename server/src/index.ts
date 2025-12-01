@@ -6,6 +6,7 @@ import { initializeWarehouse } from './config/warehouse.js';
 import authRoutes from './routes/auth.js';
 import mealRoutes from './routes/meals.js';
 import statsRoutes from './routes/stats.js';
+import pool from './config/database.js';
 
 dotenv.config();
 
@@ -84,8 +85,24 @@ app.use('/api/meals', mealRoutes);
 app.use('/api/stats', statsRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'SmartCal API is running' });
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection
+    const [result] = await pool.query('SELECT 1 as test');
+    res.json({ 
+      status: 'ok', 
+      message: 'SmartCal API is running',
+      database: 'connected'
+    });
+  } catch (error: any) {
+    console.error('Health check - Database error:', error.message);
+    res.status(503).json({ 
+      status: 'error', 
+      message: 'SmartCal API is running but database connection failed',
+      database: 'disconnected',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
