@@ -63,14 +63,26 @@ router.post('/signup', async (req, res) => {
     });
   } catch (error: any) {
     console.error('Signup error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      sqlMessage: error.sqlMessage,
-      stack: error.stack
-    });
+    
+    // Handle database connection errors
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
+      return res.status(503).json({ 
+        error: 'Database connection failed. Please check your database configuration.',
+        code: 'DATABASE_CONNECTION_ERROR'
+      });
+    }
+    
+    // Handle MySQL errors
+    if (error.code === 'ER_ACCESS_DENIED_ERROR' || error.code === 'ER_BAD_DB_ERROR') {
+      return res.status(503).json({ 
+        error: 'Database authentication failed. Please check your database credentials.',
+        code: 'DATABASE_AUTH_ERROR'
+      });
+    }
+    
     res.status(500).json({ 
       error: 'Internal server error',
+      code: 'INTERNAL_ERROR',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -124,14 +136,26 @@ router.post('/login', async (req, res) => {
     });
   } catch (error: any) {
     console.error('Login error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      sqlMessage: error.sqlMessage,
-      stack: error.stack
-    });
+    
+    // Handle database connection errors
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
+      return res.status(503).json({ 
+        error: 'Database connection failed. Please check your database configuration.',
+        code: 'DATABASE_CONNECTION_ERROR'
+      });
+    }
+    
+    // Handle MySQL errors
+    if (error.code === 'ER_ACCESS_DENIED_ERROR' || error.code === 'ER_BAD_DB_ERROR') {
+      return res.status(503).json({ 
+        error: 'Database authentication failed. Please check your database credentials.',
+        code: 'DATABASE_AUTH_ERROR'
+      });
+    }
+    
     res.status(500).json({ 
       error: 'Internal server error',
+      code: 'INTERNAL_ERROR',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

@@ -65,7 +65,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize database and warehouse
+// Initialize database and warehouse (non-blocking - app will start even if this fails)
 initializeDatabase()
   .then(() => {
     console.log('✅ Database initialized successfully');
@@ -75,8 +75,10 @@ initializeDatabase()
     console.log('✅ Data warehouse initialized successfully');
   })
   .catch((error) => {
-    console.error('❌ Initialization error:', error);
-    console.error('This might be normal on first startup if tables need to be created.');
+    console.error('❌ Initialization error:', error.message);
+    console.error('⚠️ App will continue to run, but database operations may fail.');
+    console.error('💡 Check your database environment variables in Render Dashboard.');
+    console.error('💡 The database will be initialized when the first request is made.');
   });
 
 // Routes
@@ -106,16 +108,41 @@ app.get('/api/health', async (req, res) => {
     res.json({ 
       status: 'ok', 
       message: 'SmartCal API is running',
-      database: 'connected'
+      database: 'connected',
+      timestamp: new Date().toISOString()
     });
   } catch (error: any) {
     console.error('Health check - Database error:', error.message);
-    res.status(503).json({ 
+    
+    // Provide helpful error information
+    const errorInfo: any = {
       status: 'error', 
       message: 'SmartCal API is running but database connection failed',
       database: 'disconnected',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+      timestamp: new Date().toISOString()
+    };
+    
+    if (error.code === 'ECONNREFUSED') {
+      errorInfo.error = 'Database server refused connection. Check DB_HOST and ensure database is running.';
+      errorInfo.code = 'ECONNREFUSED';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorInfo.error = 'Database connection timeout. Check DB_HOST and network connectivity.';
+      errorInfo.code = 'ETIMEDOUT';
+    } else if (error.code === 'ENOTFOUND') {
+      errorInfo.error = 'Database host not found. Check DB_HOST value.';
+      errorInfo.code = 'ENOTFOUND';
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      errorInfo.error = 'Database access denied. Check DB_USER and DB_PASSWORD.';
+      errorInfo.code = 'ER_ACCESS_DENIED_ERROR';
+    } else if (error.code === 'ER_BAD_DB_ERROR') {
+      errorInfo.error = 'Database does not exist. Check DB_NAME value.';
+      errorInfo.code = 'ER_BAD_DB_ERROR';
+    } else {
+      errorInfo.error = process.env.NODE_ENV === 'development' ? error.message : 'Database connection failed';
+      errorInfo.code = error.code || 'UNKNOWN';
+    }
+    
+    res.status(503).json(errorInfo);
   }
 });
 
