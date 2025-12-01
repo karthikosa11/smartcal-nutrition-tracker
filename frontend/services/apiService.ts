@@ -15,28 +15,39 @@ class ApiService {
     const url = `${API_URL}${endpoint}`;
     console.log('API Request:', url, options.method || 'GET');
     
-    const response = await fetch(url, {
-      ...options,
-      headers: this.getAuthHeaders(),
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: this.getAuthHeaders(),
+        // Add timeout for better error handling
+        signal: AbortSignal.timeout(30000), // 30 second timeout
+      });
 
-    console.log('API Response status:', response.status, response.statusText);
+      console.log('API Response status:', response.status, response.statusText);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error response:', errorText);
-      let error;
-      try {
-        error = JSON.parse(errorText);
-      } catch {
-        error = { error: errorText || 'Request failed' };
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error response:', errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText || 'Request failed' };
+        }
+        throw new Error(error.error || 'Request failed');
       }
-      throw new Error(error.error || 'Request failed');
-    }
 
-    const data = await response.json();
-    console.log('API Response data:', data);
-    return data;
+      const data = await response.json();
+      console.log('API Response data:', data);
+      return data;
+    } catch (error: any) {
+      // Handle network errors
+      if (error.name === 'AbortError' || error.name === 'TypeError') {
+        console.error('Network error:', error);
+        throw new Error('Failed to connect to server. The backend might be starting up (Render free tier). Please wait a moment and try again.');
+      }
+      throw error;
+    }
   }
 
   // Meal Logs

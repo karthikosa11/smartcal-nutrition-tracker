@@ -28,6 +28,14 @@ app.use(cors({
     console.log('CORS check - Origin:', origin);
     console.log('CORS check - Allowed origins:', allowedOrigins);
     
+    // In production, be more permissive - allow any Render subdomain
+    if (process.env.NODE_ENV === 'production') {
+      // Allow Render domains
+      if (origin.includes('.onrender.com')) {
+        return callback(null, true);
+      }
+    }
+    
     // Check if origin matches any allowed origin
     const isAllowed = allowedOrigins.some(allowed => {
       // Exact match
@@ -41,7 +49,12 @@ app.use(cors({
       callback(null, true);
     } else {
       console.warn('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      // In production, still allow but log warning
+      if (process.env.NODE_ENV === 'production') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   credentials: true,

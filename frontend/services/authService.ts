@@ -28,17 +28,28 @@ class AuthService {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        // Add timeout for better error handling
+        signal: AbortSignal.timeout(30000), // 30 second timeout
+      });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(error.error || 'Request failed');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Request failed' }));
+        throw new Error(error.error || 'Request failed');
+      }
+
+      return response.json();
+    } catch (error: any) {
+      // Handle network errors
+      if (error.name === 'AbortError' || error.name === 'TypeError') {
+        console.error('Network error:', error);
+        throw new Error('Failed to connect to server. Please check your internet connection and ensure the backend is running.');
+      }
+      throw error;
     }
-
-    return response.json();
   }
 
   async signup(data: SignupData): Promise<{ user: User; token: string }> {
