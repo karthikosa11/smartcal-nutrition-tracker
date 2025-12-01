@@ -123,6 +123,19 @@ npm run dev
 - ✅ Transaction management
 - ✅ Data warehousing
 
+## 🚀 Deployment
+
+### Deploy to Render
+
+See [RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md) for detailed deployment instructions.
+
+**Quick Steps:**
+1. Push code to GitHub
+2. Create Web Service on Render for backend
+3. Create Static Site on Render for frontend
+4. Configure environment variables
+5. Set up MySQL database
+
 ## 📝 License
 
 MIT
