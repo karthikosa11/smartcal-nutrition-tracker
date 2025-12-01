@@ -36,6 +36,11 @@ async function testConnection() {
   }
 }
 
+// SSL configuration (for services like PlanetScale)
+const sslConfig = process.env.DB_SSL === 'true' 
+  ? { rejectUnauthorized: false } 
+  : undefined;
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -47,10 +52,8 @@ const pool = mysql.createPool({
   connectTimeout: 10000,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
-  // Retry configuration
-  reconnect: true,
   // SSL configuration (for services like PlanetScale)
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+  ...(sslConfig && { ssl: sslConfig })
 });
 
 // Test database connection on startup (non-blocking)
