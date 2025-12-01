@@ -1,13 +1,17 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import pool from '../config/database.js';
 import crypto from 'crypto';
 
 const router = express.Router();
 
-const JWT_SECRET: string = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+
+if (!JWT_SECRET || JWT_SECRET === 'your-secret-key-change-in-production') {
+  console.warn('Warning: Using default JWT_SECRET. Change this in production!');
+}
 
 // Signup
 router.post('/signup', async (req, res) => {
@@ -43,7 +47,7 @@ router.post('/signup', async (req, res) => {
     const token = jwt.sign(
       { userId, username, email, role: 'USER' },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN } as SignOptions
     );
 
     res.status(201).json({
@@ -95,7 +99,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { userId: user.id, username: user.username, email: user.email, role: user.role },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN } as SignOptions
     );
 
     res.json({
