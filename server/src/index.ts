@@ -84,6 +84,20 @@ app.use('/api/auth', authRoutes);
 app.use('/api/meals', mealRoutes);
 app.use('/api/stats', statsRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'SmartCal API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      meals: '/api/meals',
+      stats: '/api/stats'
+    }
+  });
+});
+
 // Health check
 app.get('/api/health', async (req, res) => {
   try {
@@ -103,6 +117,23 @@ app.get('/api/health', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
+});
+
+// Catch-all for undefined routes
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found',
+    path: req.originalUrl,
+    method: req.method,
+    availableEndpoints: {
+      root: 'GET /',
+      health: 'GET /api/health',
+      signup: 'POST /api/auth/signup',
+      login: 'POST /api/auth/login',
+      verify: 'GET /api/auth/verify',
+      profile: 'PUT /api/auth/profile'
+    }
+  });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
