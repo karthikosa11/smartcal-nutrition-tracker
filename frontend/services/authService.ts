@@ -1,3 +1,5 @@
+import { User, UserRole } from '../types.js';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export interface SignupData {
@@ -5,14 +7,6 @@ export interface SignupData {
   email: string;
   password: string;
   dailyCalorieTarget?: number;
-}
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  dailyCalorieTarget: number;
 }
 
 class AuthService {
@@ -53,11 +47,17 @@ class AuthService {
       body: JSON.stringify(data),
     });
 
+    // Convert role string to UserRole enum
+    const user: User = {
+      ...response.user,
+      role: response.user.role as UserRole
+    };
+
     this.token = response.token;
     localStorage.setItem('auth_token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('user', JSON.stringify(user));
 
-    return response;
+    return { user, token: response.token };
   }
 
   async login(username: string, password: string): Promise<{ user: User; token: string }> {
@@ -66,11 +66,17 @@ class AuthService {
       body: JSON.stringify({ username, password }),
     });
 
+    // Convert role string to UserRole enum
+    const user: User = {
+      ...response.user,
+      role: response.user.role as UserRole
+    };
+
     this.token = response.token;
     localStorage.setItem('auth_token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('user', JSON.stringify(user));
 
-    return response;
+    return { user, token: response.token };
   }
 
   async verifyToken(): Promise<User | null> {
@@ -80,7 +86,12 @@ class AuthService {
 
     try {
       const response = await this.request('/auth/verify');
-      return response.user;
+      // Convert role string to UserRole enum
+      const user: User = {
+        ...response.user,
+        role: response.user.role as UserRole
+      };
+      return user;
     } catch (error) {
       this.logout();
       return null;
@@ -99,7 +110,13 @@ class AuthService {
 
   getUser(): User | null {
     const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr) return null;
+    const parsed = JSON.parse(userStr);
+    // Convert role string to UserRole enum
+    return {
+      ...parsed,
+      role: parsed.role as UserRole
+    };
   }
 
   isAuthenticated(): boolean {
@@ -112,10 +129,16 @@ class AuthService {
       body: JSON.stringify(updates),
     });
 
+    // Convert role string to UserRole enum
+    const user: User = {
+      ...response.user,
+      role: response.user.role as UserRole
+    };
+
     // Update stored user data
-    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('user', JSON.stringify(user));
     
-    return response.user;
+    return user;
   }
 }
 
