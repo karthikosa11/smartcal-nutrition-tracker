@@ -16,8 +16,7 @@ const PORT = parseInt(process.env.PORT || '3001', 10);
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
-  'https://smartcal-frontend.onrender.com',
-  'https://smartcal-nutrition-tracker-frontend.onrender.com', // Actual frontend URL
+  'https://smartcal-nutrition-tracker-frontend.onrender.com', // Frontend URL
 ].filter(Boolean);
 
 app.use(cors({
