@@ -43,11 +43,11 @@ DBT project/
 ### 1. Backend Setup
 
 ```bash
-cd backend  # or cd server if not renamed yet
+cd server
 npm install
 ```
 
-Create `backend/.env` (or `server/.env` if not renamed):
+Create `server/.env` (copy from `server/.env.example`):
 ```env
 DB_HOST=localhost
 DB_USER=root
@@ -56,6 +56,7 @@ DB_NAME=smartcal_db
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=7d
 PORT=3001
+FRONTEND_URL=http://localhost:5173
 ```
 
 Initialize database:
@@ -77,7 +78,7 @@ cd frontend
 npm install
 ```
 
-Create `frontend/.env` (or root `.env`):
+Create `frontend/.env` (copy from `frontend/.env.example`):
 ```env
 VITE_API_URL=http://localhost:3001/api
 VITE_GEMINI_API_KEY=your_gemini_api_key
