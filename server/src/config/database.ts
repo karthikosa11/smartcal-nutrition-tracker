@@ -32,15 +32,35 @@ const pool = mysql.createPool({
 pool.getConnection()
   .then(connection => {
     console.log('✅ Database connection successful');
+    console.log('Database info:', {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      database: process.env.DB_NAME,
+      passwordSet: !!process.env.DB_PASSWORD
+    });
     connection.release();
   })
   .catch(error => {
     console.error('❌ Database connection failed:', error.message);
-    console.error('Check your database environment variables:');
-    console.error('  DB_HOST:', process.env.DB_HOST || 'NOT SET');
-    console.error('  DB_USER:', process.env.DB_USER || 'NOT SET');
-    console.error('  DB_NAME:', process.env.DB_NAME || 'NOT SET');
-    console.error('  DB_PASSWORD:', process.env.DB_PASSWORD ? '***SET***' : 'NOT SET');
+    console.error('Error code:', error.code);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      errno: error.errno,
+      sqlState: error.sqlState,
+      sqlMessage: error.sqlMessage
+    });
+    console.error('\n📋 Check your database environment variables in Render:');
+    console.error('  DB_HOST:', process.env.DB_HOST || '❌ NOT SET');
+    console.error('  DB_USER:', process.env.DB_USER || '❌ NOT SET');
+    console.error('  DB_NAME:', process.env.DB_NAME || '❌ NOT SET');
+    console.error('  DB_PASSWORD:', process.env.DB_PASSWORD ? '✅ SET' : '❌ NOT SET');
+    console.error('\n💡 Common issues:');
+    console.error('  1. Database credentials are incorrect');
+    console.error('  2. Database does not exist');
+    console.error('  3. Database is not accessible from Render');
+    console.error('  4. Database requires SSL connection');
+    console.error('  5. Firewall blocking connections');
   });
 
 export default pool;
