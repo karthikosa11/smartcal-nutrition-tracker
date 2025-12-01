@@ -77,20 +77,6 @@ export const EditMeal: React.FC<EditMealProps> = ({ meal, onClose, onUpdate }) =
   const totalCarbs = foodItems.reduce((sum, item) => sum + (item.carbs || 0), 0);
   const totalFat = foodItems.reduce((sum, item) => sum + (item.fat || 0), 0);
 
-  // Calculate nutrition per 100g for a food item
-  const getNutritionPer100g = (item: FoodItemWithQuantity) => {
-    // Use originalQuantity if available, otherwise use current quantity, default to 100
-    const baseQuantity = item.originalQuantity || item.quantity || 100;
-    // If quantity is 0 or invalid, default to 100g
-    const quantity = baseQuantity > 0 ? baseQuantity : 100;
-    
-    return {
-      calories: (item.calories / quantity) * 100,
-      protein: (item.protein / quantity) * 100,
-      carbs: (item.carbs / quantity) * 100,
-      fat: (item.fat / quantity) * 100
-    };
-  };
 
   // Recalculate nutrition based on new quantity
   // IMPORTANT: This function should NEVER modify the quantity - it's only used as input
@@ -104,17 +90,25 @@ export const EditMeal: React.FC<EditMealProps> = ({ meal, onClose, onUpdate }) =
     // If per100g doesn't exist, calculate it from current values
     let per100g = item.per100g;
     if (!per100g) {
-      const baseQuantity = item.originalQuantity || item.quantity || 100;
-      if (baseQuantity <= 0) {
+      // Convert quantity to number if it's a string
+      const baseQuantityNum = typeof item.originalQuantity === 'number' 
+        ? item.originalQuantity 
+        : typeof item.quantity === 'number' 
+          ? item.quantity 
+          : typeof item.quantity === 'string' 
+            ? parseFloat(item.quantity) || 100
+            : 100;
+      
+      if (baseQuantityNum <= 0) {
         // Can't calculate, return item unchanged
         return { ...item };
       }
       const multiplier = item.isCountBased ? 1 : 100;
       per100g = {
-        calories: (item.calories / baseQuantity) * multiplier,
-        protein: (item.protein / baseQuantity) * multiplier,
-        carbs: (item.carbs / baseQuantity) * multiplier,
-        fat: (item.fat / baseQuantity) * multiplier
+        calories: (item.calories / baseQuantityNum) * multiplier,
+        protein: (item.protein / baseQuantityNum) * multiplier,
+        carbs: (item.carbs / baseQuantityNum) * multiplier,
+        fat: (item.fat / baseQuantityNum) * multiplier
       };
     }
     
@@ -203,15 +197,21 @@ export const EditMeal: React.FC<EditMealProps> = ({ meal, onClose, onUpdate }) =
       updated[index] = { ...updated[index], [field]: value };
       // If nutrition values changed manually, recalculate per-100g values
       if (field === 'calories' || field === 'protein' || field === 'carbs' || field === 'fat') {
-        const currentQuantity = updated[index].quantity || updated[index].originalQuantity || 100;
+        // Convert quantity to number if it's a string
+        const currentQuantity = typeof updated[index].quantity === 'number'
+          ? updated[index].quantity
+          : typeof updated[index].quantity === 'string'
+            ? parseFloat(updated[index].quantity) || updated[index].originalQuantity || 100
+            : updated[index].originalQuantity || 100;
+        const quantityNum = currentQuantity > 0 ? currentQuantity : 100;
         const multiplier = updated[index].isCountBased ? 1 : 100;
         updated[index].per100g = {
-          calories: (updated[index].calories / currentQuantity) * multiplier,
-          protein: (updated[index].protein / currentQuantity) * multiplier,
-          carbs: (updated[index].carbs / currentQuantity) * multiplier,
-          fat: (updated[index].fat / currentQuantity) * multiplier
+          calories: (updated[index].calories / quantityNum) * multiplier,
+          protein: (updated[index].protein / quantityNum) * multiplier,
+          carbs: (updated[index].carbs / quantityNum) * multiplier,
+          fat: (updated[index].fat / quantityNum) * multiplier
         };
-        updated[index].originalQuantity = currentQuantity;
+        updated[index].originalQuantity = quantityNum;
       }
     }
     
