@@ -13,7 +13,7 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
-// Middleware
+
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
@@ -22,16 +22,14 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Log for debugging
     console.log('CORS check - Origin:', origin);
     console.log('CORS check - Allowed origins:', allowedOrigins);
     
-    // In production, be more permissive - allow any Render subdomain
+    
     if (process.env.NODE_ENV === 'production') {
-      // Allow Render domains
+     
       if (origin.includes('.onrender.com')) {
         return callback(null, true);
       }
