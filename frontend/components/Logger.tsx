@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MealType, FoodItem, MealLog, User } from '../types';
 import { parseFoodText } from '../services/geminiService';
 import { DBService } from '../services/dbService';
+import { getTodayDate } from '../utils/dateUtils';
 
 interface LoggerProps {
   user: User;
@@ -124,8 +125,10 @@ export const Logger: React.FC<LoggerProps> = ({ user, onLogAdded }) => {
     setError(null);
     setSuccess(false);
 
-    // Use local date to avoid timezone issues
-    const today = new Date().toLocaleDateString('en-CA'); // Returns YYYY-MM-DD format
+    // Use consistent date utility to avoid timezone issues
+    const today = getTodayDate();
+    
+    console.log('Logger - Using date:', today);
     
     const newLog: MealLog = {
       id: crypto.randomUUID(),

@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { MealLog, User } from '../types';
 import { authService } from '../services/authService';
+import { getTodayDate } from '../utils/dateUtils';
 
 interface DashboardProps {
   logs: MealLog[];
@@ -14,14 +15,39 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, user, onUserUpdate }
   const [targetValue, setTargetValue] = useState(user.dailyCalorieTarget.toString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [today, setToday] = useState<string>(getTodayDate());
   
-  // Get today's date in YYYY-MM-DD format (local timezone)
-  const today = new Date().toLocaleDateString('en-CA'); // Returns YYYY-MM-DD format
+  // Update today's date periodically to handle day changes
+  useEffect(() => {
+    const updateToday = () => {
+      const newToday = getTodayDate();
+      if (newToday !== today) {
+        console.log('Dashboard - Date changed from', today, 'to', newToday);
+        setToday(newToday);
+      }
+    };
+    
+    // Update immediately
+    updateToday();
+    
+    // Update every minute to catch day changes
+    const interval = setInterval(updateToday, 60000);
+    
+    return () => clearInterval(interval);
+  }, [today]);
+  
+  // Force recalculation when logs change
+  useEffect(() => {
+    console.log('Dashboard - Logs updated, recalculating stats');
+  }, [logs]);
   
   // Debug: Log today's date and logs
   console.log('Dashboard - Today:', today);
   console.log('Dashboard - All logs:', logs);
-  console.log('Dashboard - Today logs:', logs.filter(l => l.date === today));
+  console.log('Dashboard - Today logs:', logs.filter(l => {
+    const logDate = l.date?.split('T')[0] || l.date; // Handle both YYYY-MM-DD and ISO format
+    return logDate === today;
+  }));
 
   const handleTargetUpdate = async () => {
     const newTarget = parseInt(targetValue);
@@ -58,7 +84,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, user, onUserUpdate }
   };
   
   const dailyStats = useMemo(() => {
-    const todayLogs = logs.filter(l => l.date === today);
+    // Normalize date format for comparison (handle both YYYY-MM-DD and ISO format)
+    const todayLogs = logs.filter(l => {
+      const logDate = l.date?.split('T')[0] || l.date; // Extract YYYY-MM-DD from ISO string if needed
+      return logDate === today;
+    });
+    
+    console.log('Dashboard - Filtered today logs:', todayLogs);
+    
     const totalCals = todayLogs.reduce((acc, curr) => acc + curr.totalCalories, 0);
     const protein = todayLogs.reduce((acc, curr) => acc + curr.foodItems.reduce((s, f) => s + f.protein, 0), 0);
     const carbs = todayLogs.reduce((acc, curr) => acc + curr.foodItems.reduce((s, f) => s + f.carbs, 0), 0);
@@ -72,8 +105,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, user, onUserUpdate }
     for(let i=6; i>=0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      const dayLogs = logs.filter(l => l.date === dateStr);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      
+      // Normalize date format for comparison
+      const dayLogs = logs.filter(l => {
+        const logDate = l.date?.split('T')[0] || l.date;
+        return logDate === dateStr;
+      });
+      
       const cals = dayLogs.reduce((acc, curr) => acc + curr.totalCalories, 0);
       data.push({
         name: d.toLocaleDateString('en-US', { weekday: 'short' }),
