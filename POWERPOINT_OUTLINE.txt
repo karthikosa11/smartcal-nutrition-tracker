@@ -1,0 +1,300 @@
+SMARTCAL AI NUTRITION TRACKER - POWERPOINT OUTLINE
+====================================================
+
+SLIDE 1: TITLE SLIDE
+-------------------
+SmartCal AI Nutrition Tracker
+AI-Powered Full-Stack Nutrition Tracking Application
+[Your Name]
+[Date]
+[Course/Project Name]
+
+SLIDE 2: AGENDA
+--------------
+1. Project Overview
+2. Technology Stack
+3. Key Features
+4. Database Architecture
+5. Application Demo
+6. Technical Highlights
+7. Deployment
+8. Conclusion
+
+SLIDE 3: PROJECT OVERVIEW
+-------------------------
+• Full-stack web application for nutrition tracking
+• AI-powered food recognition using Google Gemini
+• Natural language meal logging
+• Real-time nutrition calculations
+• Data visualization and insights
+• Production-ready deployment on Render
+
+SLIDE 4: TECHNOLOGY STACK
+--------------------------
+FRONTEND:
+• React 18 + TypeScript
+• Vite (Build Tool)
+• Tailwind CSS
+• Recharts (Charts)
+• Google Gemini AI
+
+BACKEND:
+• Express.js + TypeScript
+• MySQL Database
+• JWT Authentication
+• Bcrypt (Password Hashing)
+
+DEPLOYMENT:
+• Render (Frontend & Backend)
+• Cloud MySQL
+
+SLIDE 5: KEY FEATURES - AUTHENTICATION & AI
+--------------------------------------------
+1. USER AUTHENTICATION
+   • Secure registration and login
+   • JWT token-based sessions
+   • Password hashing
+
+2. AI-POWERED MEAL LOGGING
+   • Natural language input
+   • Multiple food items support
+   • Automatic nutrition calculation
+   • Example: "100g chicken and 2 eggs"
+
+SLIDE 6: KEY FEATURES - MANUAL ENTRY & DASHBOARD
+-------------------------------------------------
+3. MANUAL MEAL ENTRY
+   • Add multiple food items
+   • Real-time total calculation
+   • Support for grams and count-based items
+
+4. DASHBOARD & VISUALIZATION
+   • Daily calorie progress
+   • Macro breakdown charts
+   • Weekly statistics
+
+SLIDE 7: KEY FEATURES - HISTORY & INSIGHTS
+------------------------------------------
+5. MEAL HISTORY
+   • Chronological meal display
+   • Edit with quantity updates
+   • Automatic recalculation
+
+6. DIETARY INSIGHTS
+   • AI-generated recommendations
+   • Pattern analysis
+
+7. SETTINGS MANAGEMENT
+   • Update calorie targets
+   • Profile management
+
+SLIDE 8: DATABASE ARCHITECTURE
+-------------------------------
+4 MAIN TABLES:
+
+1. users
+   • User accounts and preferences
+   • Daily calorie targets
+
+2. meal_logs
+   • Individual meal entries
+   • JSON storage for food items
+
+3. daily_stats (Warehouse)
+   • Pre-aggregated daily data
+
+4. weekly_stats (Warehouse)
+   • Pre-aggregated weekly data
+
+SLIDE 9: DATABASE SCHEMA
+------------------------
+users Table:
+• id, username, email, password_hash
+• role, daily_calorie_target
+
+meal_logs Table:
+• id, user_id, date, meal_type
+• food_items (JSON), total_calories
+• Foreign key to users
+
+Warehouse Tables:
+• daily_stats: Aggregated daily nutrition
+• weekly_stats: Aggregated weekly trends
+
+SLIDE 10: DATABASE RELATIONSHIPS
+---------------------------------
+users (1) ────< (many) meal_logs
+users (1) ────< (many) daily_stats
+users (1) ────< (many) weekly_stats
+
+Key Features:
+• Cascade deletion
+• Indexes for performance
+• JSON storage for flexibility
+• Transaction management
+
+SLIDE 11: TECHNICAL HIGHLIGHTS
+------------------------------
+1. TRANSACTION MANAGEMENT
+   • All operations use transactions
+   • Data consistency guaranteed
+   • Automatic rollback on errors
+
+2. DATA WAREHOUSING
+   • Pre-aggregated statistics
+   • Fast dashboard queries
+   • Reduced database load
+
+3. JSON STORAGE
+   • Flexible food items storage
+   • Multiple items per meal
+
+SLIDE 12: API ARCHITECTURE
+--------------------------
+RESTful API Endpoints:
+
+• /api/auth - Authentication
+  (signup, login, verify, profile)
+
+• /api/meals - Meal Management
+  (CRUD operations)
+
+• /api/stats - Statistics
+  (daily, weekly)
+
+Features:
+• JWT authentication
+• Error handling
+• CORS configuration
+
+SLIDE 13: AI INTEGRATION
+-------------------------
+Google Gemini AI:
+
+Capabilities:
+• Natural language food parsing
+• Multiple food item recognition
+• Automatic nutrition calculation
+• Fallback parser when AI unavailable
+
+Example:
+Input: "100 grams of chicken and 100 grams of rice"
+Output: Parsed items with calculated nutrition
+
+SLIDE 14: DEPLOYMENT
+--------------------
+PRODUCTION DEPLOYMENT:
+
+Frontend:
+• Render Static Site
+• smartcal-nutrition-tracker-frontend.onrender.com
+
+Backend:
+• Render Web Service
+• smartcal-nutrition-tracker.onrender.com
+
+Database:
+• Cloud MySQL (Railway/PlanetScale)
+• Automatic table initialization
+
+SLIDE 15: DEMO - REGISTRATION
+-----------------------------
+Step 1: User Registration
+• Sign up with username, email, password
+• Set daily calorie target
+• Automatic login after registration
+• JWT token stored securely
+
+SLIDE 16: DEMO - AI LOGGING
+---------------------------
+Step 2: AI Text Parsing
+• Enter: "100 grams of chicken and 100 grams of rice"
+• AI parses multiple food items
+• Automatic nutrition calculation
+• Combined totals displayed
+
+SLIDE 17: DEMO - DASHBOARD
+--------------------------
+Step 3: View Dashboard
+• Daily calorie progress bar
+• Macro breakdown (protein, carbs, fat)
+• Interactive charts
+• Weekly statistics
+
+Data Source:
+• Pre-aggregated warehouse tables
+• Fast query performance
+
+SLIDE 18: DEMO - EDIT MEAL
+---------------------------
+Step 4: Edit Meal
+• Change quantity: 100g → 150g
+• Automatic nutrition recalculation
+• Calories: 165 → 247.5
+• All macros update proportionally
+
+SLIDE 19: CHALLENGES & SOLUTIONS
+---------------------------------
+1. Multiple Food Items Parsing
+   Solution: Enhanced AI prompt and fallback parser
+
+2. Quantity-Based Updates
+   Solution: Separate input state and recalculation logic
+
+3. Database Connection
+   Solution: Cloud MySQL setup
+
+4. CORS Issues
+   Solution: Proper CORS configuration
+
+SLIDE 20: FUTURE ENHANCEMENTS
+------------------------------
+Potential Features:
+• Image recognition for food photos
+• Mobile app version
+• Social features (sharing, challenges)
+• Meal planning and recipes
+• Barcode scanning
+• Fitness tracker integration
+
+SLIDE 21: PROJECT STATISTICS
+-----------------------------
+Code Metrics:
+• Frontend: ~2,000+ lines
+• Backend: ~1,500+ lines
+• Total: ~3,500+ lines
+
+Features:
+• 7 major features
+• 4 database tables
+• 15+ API endpoints
+• Full CRUD operations
+
+SLIDE 22: CONCLUSION
+--------------------
+What We Built:
+• Complete full-stack application
+• AI-powered nutrition tracking
+• Production deployment
+• Modern tech stack
+
+Key Achievements:
+✅ AI integration
+✅ Real-time calculations
+✅ Data visualization
+✅ Transaction management
+✅ Data warehousing
+✅ Production deployment
+
+SLIDE 23: THANK YOU
+-------------------
+Thank You!
+
+Questions?
+
+Live Application:
+Frontend: https://smartcal-nutrition-tracker-frontend.onrender.com
+Backend: https://smartcal-nutrition-tracker.onrender.com
+
+GitHub: [Your Repository URL]
+
